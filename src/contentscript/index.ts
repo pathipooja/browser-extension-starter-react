@@ -118,7 +118,6 @@ function addElementToStore(cur_element: string) {
             if (cur_marker_status) {
                 document.querySelector(cur_element)?.classList.add('highlight');
             }
-
         }
         //in case of existing element
         else {
@@ -165,19 +164,19 @@ async function remove_highlight() {
         ele?.classList.remove('highlight');
     });
 }
-function addPopper(target:string){
-    const cur_target=<HTMLElement>document.querySelector(target)
-    const target_btn=<HTMLElement>document.querySelector('#popper')
-    if(cur_target&&target_btn){
-        target_btn.innerHTML=cur_target?.tagName
-    createPopper(cur_target,target_btn,{
-        placement: bottom
-    });
+function addPopper(target: string) {
+    const cur_target = <HTMLElement>document.querySelector(target)
+    const target_btn = <HTMLElement>document.querySelector('#popper')
+    if (cur_target && target_btn) {
+        target_btn.innerHTML = cur_target?.tagName
+        createPopper(cur_target, target_btn, {
+            placement: bottom
+        });
+    }
 }
-}
-function createButton(){
-    const button_to_be_attached=document.createElement('button')
-    button_to_be_attached.id='popper'
+function createButton() {
+    const button_to_be_attached = document.createElement('button')
+    button_to_be_attached.id = 'popper'
     document.body.appendChild(button_to_be_attached)
 }
 listenToMessages();
