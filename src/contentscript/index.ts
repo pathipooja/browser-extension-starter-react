@@ -1,5 +1,6 @@
 import { doc } from "prettier";
 import unique from "unique-selector"
+import { bottom, createPopper } from '@popperjs/core';
 console.log('this is content script');
 
 interface MessageWithResponse {
@@ -94,6 +95,7 @@ async function handleMouseClick(e: MouseEvent) {
     //to make sure that the selectors wont match with each other
     const cur_element = <string>unique(target, { excludeRegex: RegExp('highlight|hoverstyle') });
     addElementToStore(cur_element);
+    addPopper(cur_element,)
 }
 
 function addElementToStore(cur_element: string) {
@@ -163,9 +165,25 @@ async function remove_highlight() {
         ele?.classList.remove('highlight');
     });
 }
+function addPopper(target:string){
+    const cur_target=<HTMLElement>document.querySelector(target)
+    const target_btn=<HTMLElement>document.querySelector('#popper')
+    if(cur_target&&target_btn){
+        target_btn.innerHTML=cur_target?.tagName
+    createPopper(cur_target,target_btn,{
+        placement: bottom
+    });
+}
+}
+function createButton(){
+    const button_to_be_attached=document.createElement('button')
+    button_to_be_attached.id='popper'
+    document.body.appendChild(button_to_be_attached)
+}
 listenToMessages();
 window.onload = function () {
     addStyleToHead();
+    createButton();
 }
 //listenAndRespond();
 
