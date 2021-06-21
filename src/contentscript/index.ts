@@ -2,11 +2,6 @@ import { sendChromeMessage } from '../popup/utils/chrome.message'
 
 
 
-
-
-
-
-
 if (window.top === window) {
     var workflow;
     async function fetch_workflows() {
@@ -17,7 +12,6 @@ if (window.top === window) {
         start_workflow.style.cssText="z-index:500;position:fixed";
         document.body.prepend(start_workflow);
         start_workflow.addEventListener('click',initiateWorkflow);
-        // console.log(workflow);
     }
     function add_css_to_popper(){
         var popper_style=document.createElement('style');
@@ -66,7 +60,6 @@ if (window.top === window) {
         var popper=document.createElement('div');
         popper.setAttribute('class','popper_div');
         popper.setAttribute('id','popper');
-        //popper.style.cssText='z-index:500;position:fixed';
         document.body.append(popper);
     }
     window.onload = function () {
@@ -81,8 +74,7 @@ if (window.top === window) {
                     break;
                 }
                 else{
-                    // console.log(cur_step_index);
-                    var message = { type: 'step', step: workflow.steps[cur_step_index] }
+                   var message = { type: 'step', step: workflow.steps[cur_step_index] }
                     postMessageToAllFrames(message);
                 }
             }
@@ -102,11 +94,6 @@ if (window.top === window) {
         var message = { type: 'step', step: workflow.steps[cur_step_index] }
         postMessageToAllFrames(message);
     }
-    function sendMessage(event) {
-        var current_input = document.getElementById("main-frame-div1-inp1");
-        var message = { type: 'msg', message: current_input.value };
-        postMessageToAllFrames(message);
-    }
     function postMessageToAllFrames(message) {
         window.postMessage(message, '*');
         var iframes = document.getElementsByTagName('iframe');
@@ -115,25 +102,13 @@ if (window.top === window) {
         }
     }
     window.addEventListener('message', function (event) {
-        // console.log(event.data);
-        if (event.data.type === 'step' && event.data.step.iframes.length === 0) {
+       if (event.data.type === 'step' && event.data.step.iframes.length === 0) {
             cur_target_element = document.querySelector(event.data.step.selector);
-            // console.log(cur_target_element,event.data.step.selector);
             if(cur_target_element){
-                // console.log("inside if");
                 display_step(event.data);
             }
         }
-        else if (event.data.type === 'msg') {
-            display_msg(event.data)
-        }
-        else if (event.data.type === 'post_msg') {
-            // console.log('starting step');
-            var message = { type: 'msg', message: event.data.message }
-            postMessageToAllFrames(message);
-        }
         else if (event.data.type === 'move_forward') {
-            // console.log('moving to next step');
             goToNextStep();
         }
         else if(event.data.type==='readdstep'){
@@ -147,7 +122,7 @@ if (window.top === window) {
                 var iframe = document.querySelector(cur_step.iframes[0]);
                 framePosition = (iframe && iframe.getBoundingClientRect())
             }
-            if (framePosition && framePosition.left > 0) {
+            if (framePosition&&framePosition.height>0) {
                 event.data.coordinates = {
                     width: event.data.coordinates.width,
                     height: event.data.coordinates.height,
@@ -155,8 +130,7 @@ if (window.top === window) {
                     top: event.data.coordinates.top + framePosition.top,
                 }
             }
-            console.log(this.document.getElementById('popper')?.getBoundingClientRect());
-            update_popper_position(workflow.steps[cur_step_index], event.data.coordinates, framePosition)
+           update_popper_position(workflow.steps[cur_step_index], event.data.coordinates, framePosition)
             framePosition = {};
         }
     });
@@ -166,11 +140,9 @@ if (window.top === window) {
             cur_window.addEventListener('scroll', fetch_position)
     }
     function fetch_position(event) {
-       // console.log(event)
         if (event.target) {
             if (cur_step_index > -1) {
                 var coordinates = cur_target_element.getBoundingClientRect();
-                // console.log(coordinates.left + " " + coordinates.top);
                 var message = { type: 'dimens', coordinates: coordinates };
                 postMessageToAllFrames(message);
             }
@@ -181,35 +153,23 @@ if (window.top === window) {
             return;
         }
         var target = document.querySelector(data.step.selector);
-        // console.log("In display",target);
         handleParentScroll(target)
         if (target) {
 
             target.addEventListener(data.step.type, goToNextStep);
             var coordinates = target.getBoundingClientRect();
-            // console.log(coordinates);
-            if (coordinates.left > 0) {
-                update_popper_position(data.step, coordinates,framePosition)
-            }
+                var message={type:'dimens',coordinates:coordinates};
+                postMessageToAllFrames(message);           
         }
     }
-    function display_msg(data) {
-        var target_div = document.getElementById("main-frame-messages");
-        var element = document.createElement('div');
-        element.innerHTML = event.data.message;
-        if (event.data.message !== undefined) {
-            target_div.appendChild(element);
-        }
-    }
+    
     function update_popper_position(step, coordinates, framePosition) {
         var popper = document.getElementById('popper');
-        // console.log(coordinates.top);
         popper.innerHTML = step.content;
         if (framePosition) {
             console.log(coordinates.left,coordinates.top);
             console.log(framePosition.left,framePosition.top);
             if (coordinates.top - framePosition.top <= 0) {
-                // console.log('hiding');
                 popper.style.visibility = "hidden";
             }
             else {
@@ -218,7 +178,6 @@ if (window.top === window) {
         }
         else {
             if (coordinates.top <= 0) {
-                // console.log('hiding');
                 popper.style.visibility = "hidden";
             }
             else {
@@ -226,8 +185,7 @@ if (window.top === window) {
             }
         }
         
-        //popper.style.top = coordinates.top + coordinates.height / 2 - popper.offsetHeight / 2 + 'px';
-        popper.style.top=coordinates.top - (coordinates.height / 3) + 10 + 'px';
+        popper.style.top = coordinates.top + coordinates.height / 2 - popper.offsetHeight / 2 + 'px';
         popper.style.left = coordinates.left + coordinates.width + 10 + 'px'
         console.log(popper?.getBoundingClientRect());
     }
@@ -236,7 +194,6 @@ if (window.top === window) {
     function goToNextStep(event) {
         if (workflow.steps[cur_step_index].iframes.length === 0) {
             if (event.target.parentElement) {
-                // console.log(event.target.parentElement)
                 event.target.parentElement.removeEventListener('scroll', fetch_position);
             }
             event.target.removeEventListener(event.type, goToNextStep);
@@ -256,7 +213,6 @@ else{
     var mutation_observer=new MutationObserver(function (records){
         var isValid=true;
         for (const mutation of records) {
-                // console.log(cur_step_index);
                 var message = { type: 'readdstep'}
                 window.top.postMessage(message,'*');
         }
@@ -275,7 +231,6 @@ else{
         window.top.postMessage(message,'*');
     }
     function goToNextStep(event){
-        // console.log("Removing Listener");
         event.target.parentElement.removeEventListener('scroll',fetch_position);
         event.target.removeEventListener(event.type,goToNextStep)
         var message={type:'move_forward'}
@@ -283,13 +238,12 @@ else{
     }
     function handleParentScroll(target){
         var cur_window=target.parentElement;
-        // console.log(cur_window);
     cur_window.addEventListener('scroll',fetch_position)
 }
 function fetch_position(){
     if(target_element){
+        console.log(target_element);
         var coordinates=target_element.getBoundingClientRect();
-        // console.log(coordinates.top)
         var message={type:'dimens',coordinates:coordinates};
         window.top.postMessage(message);
     }
@@ -297,41 +251,18 @@ function fetch_position(){
     function display_step(data) {
         var element = document.querySelector(data.step.selector);
           if (element) {
-            //   console.log(element);
             handleParentScroll(element);
               element.addEventListener(data.step.type,goToNextStep)
             var coordinates = element.getBoundingClientRect();
-            if (coordinates.left > 0) {
               var message = {type:'dimens', coordinates:coordinates};
               window.top.postMessage(message, '*')
-            }
           }
     }
-    function calculate_position(step_data){
-        var element=document.querySelector(step_data.selector);
-        var coordinates = element.getBoundingClientRect();
-            if (coordinates.left > 0) {
-              var message = {type:'dimens', coordinates:coordinates};
-              window.top.postMessage(message, '*')
-            }
-    }
-    function display_msg(data) {
-        var target_div=document.getElementById("iframe1-messages");
-        var element=document.createElement('div');
-          element.innerHTML=data.message;
-          target_div.appendChild(element)
-    }
+    
     window.addEventListener('message',function(event){
-        if(event.data.type==='msg'){
-            display_msg(event.data);
-        }
         if(event.data.type==='step' && event.data.step.iframes[0] === '#brandBand_2 > div > div > div.windowViewMode-normal.oneContent.active.lafPageHost > iframe') {
-            // console.log(event.data);
             target_element=  document.querySelector(event.data.step.selector);
           display_step(event.data);
-        }
-        if(event.data.type==='fetch_position_from_iframe' && event.data.step.iframes[0] === '#iframe1'){
-            calculate_position(event.data.step);
         }
     });
 }
