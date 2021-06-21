@@ -91,6 +91,7 @@ if (window.top === window) {
     var cur_target_element;
     function initiateWorkflow() {
         cur_step_index = 0;
+        //document.getElementById('popper')?.style.visibility="visible";
         var message = { type: 'step', step: workflow.steps[cur_step_index] }
         postMessageToAllFrames(message);
     }
@@ -201,7 +202,7 @@ if (window.top === window) {
         cur_step_index = cur_step_index + 1;
         if (cur_step_index >= workflow.steps.length) {
             alert('flow completed');
-            document.getElementById('popper').style.display = "none";
+            document.getElementById('popper').style.visibility = "hidden";
             return;
         }
         var message = { type: 'step', step: workflow.steps[cur_step_index] };
